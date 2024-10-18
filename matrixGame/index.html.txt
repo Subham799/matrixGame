@@ -45,43 +45,43 @@
       -->
     <script>// script.js
 
-        // Game variables
-        let gridSize = 3;  // Starting grid size
-        let pattern = [];
-        let userPattern = [];
-        let allowInput = false; // Control when user can input
-        
-        const gameContainer = document.getElementById('game-container');
-        const startButton = document.getElementById('start-game');
-        
-        // Function to create the grid
-        function createGrid(size) {
-            gameContainer.innerHTML = ''; // Clear the grid
-            gameContainer.style.gridTemplateColumns = `repeat(${size}, 50px)`;
-            
-            for (let i = 0; i < size * size; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('grid-cell');
-                cell.addEventListener('click', () => handleCellClick(i));
-                gameContainer.appendChild(cell);
-            }
+       // Game variables
+let gridSize = 3;  // Starting grid size
+let pattern = [];
+let userPattern = [];
+let allowInput = false; // Control when user can input
+
+const gameContainer = document.getElementById('game-container');
+const startButton = document.getElementById('start-game');
+
+// Function to create the grid
+function createGrid(size) {
+    gameContainer.innerHTML = ''; // Clear the grid
+    gameContainer.style.gridTemplateColumns = `repeat(${size}, 50px)`;
+
+    for (let i = 0; i < size * size; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('grid-cell');
+        cell.addEventListener('click', () => handleCellClick(i));
+        gameContainer.appendChild(cell);
+    }
+}
+
+// Function to generate a random pattern
+function generatePattern(size) {
+    pattern = [];
+    const numCells = size * size;
+    const patternLength = Math.floor(size * 1.5); // Increase pattern as grid grows
+
+    while (pattern.length < patternLength) {
+        const randomIndex = Math.floor(Math.random() * numCells);
+        if (!pattern.includes(randomIndex)) {
+            pattern.push(randomIndex);
         }
-        
-        // Function to generate a random pattern
-        function generatePattern(size) {
-            pattern = [];
-            const numCells = size * size;
-            const patternLength = Math.floor(size * 1.5); // Increase pattern as grid grows
-            
-            while (pattern.length < patternLength) {
-                const randomIndex = Math.floor(Math.random() * numCells);
-                if (!pattern.includes(randomIndex)) {
-                    pattern.push(randomIndex);
-                }
-            }
-        }
-        
-       // Function to display the pattern
+    }
+}
+
+// Function to display the pattern
 function showPattern() {
     allowInput = false;
     userPattern = [];
@@ -102,42 +102,52 @@ function showPattern() {
     }, 1000);  // Adjust the delay as needed
 }
 
-        
-        // Handle user cell clicks
-        function handleCellClick(index) {
-            if (!allowInput) return;
-        
-            userPattern.push(index);
-            const cell = document.querySelectorAll('.grid-cell')[index];
-            cell.classList.add('active');
-            
-            // Check if user pattern matches
-            if (userPattern.length === pattern.length) {
-                checkPattern();
-            }
-        }
-        
-        // Check if user got the pattern right
-        function checkPattern() {
-            if (JSON.stringify(userPattern) === JSON.stringify(pattern)) {
-                alert('Correct! Moving to next level.');
-                gridSize++;
-                startGame();  // Increase grid size and start next round
-            } else {
-                alert('Incorrect! Try again.');
-                userPattern = [];
-            }
-        }
-        
-        // Start the game
-        function startGame() {
-            createGrid(gridSize);
-            generatePattern(gridSize);
-            setTimeout(showPattern, 1000); // Show pattern after grid is ready
-        }
-        
-        // Event listener for the start button
-        startButton.addEventListener('click', startGame);
-        </script>
+// Handle user cell clicks
+function handleCellClick(index) {
+    if (!allowInput) return;  // Prevent clicking when input is not allowed
+
+    if (userPattern.includes(index)) return;  // Prevent clicking the same cell twice
+
+    userPattern.push(index);
+    const cell = document.querySelectorAll('.grid-cell')[index];
+    cell.classList.add('active');
+
+    // Check if the user has completed their input (same length as the pattern)
+    if (userPattern.length === pattern.length) {
+        checkPattern();
+    }
+}
+
+// Check if user got the pattern right
+function checkPattern() {
+    // Check if the user pattern matches the generated pattern
+    if (JSON.stringify(userPattern) === JSON.stringify(pattern)) {
+        alert('Correct! Moving to next level.');
+        gridSize++;  // Increase grid size for the next round
+        startGame(); // Start the game again with increased grid size
+    } else {
+        alert('Incorrect! Try again.');
+        resetGrid();  // Reset the grid without restarting the game
+    }
+}
+
+// Function to reset the grid (clear user selections)
+function resetGrid() {
+    userPattern = []; // Clear the user input
+    document.querySelectorAll('.grid-cell').forEach(cell => {
+        cell.classList.remove('active');  // Remove any highlights
+    });
+}
+
+// Start the game
+function startGame() {
+    createGrid(gridSize);
+    generatePattern(gridSize);
+    setTimeout(showPattern, 1000); // Show pattern after grid is ready
+}
+
+// Event listener for the start button
+startButton.addEventListener('click', startGame);
+</script>
 </body>
 </html>
