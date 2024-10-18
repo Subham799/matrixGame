@@ -81,26 +81,27 @@
             }
         }
         
-        // Function to display the pattern
-        function showPattern() {
-            allowInput = false;
-            userPattern = [];
-            
-            pattern.forEach((index, i) => {
-                setTimeout(() => {
-                    const cell = document.querySelectorAll('.grid-cell')[index];
-                    cell.classList.add('active');
-                }, i * 500);
-                
-                setTimeout(() => {
-                    const cell = document.querySelectorAll('.grid-cell')[index];
-                    cell.classList.remove('active');
-                    if (i === pattern.length - 1) {
-                        allowInput = true;  // Allow user to start clicking
-                    }
-                }, (i + 1) * 500);
-            });
-        }
+       // Function to display the pattern
+function showPattern() {
+    allowInput = false;
+    userPattern = [];
+
+    // Highlight all cells in the pattern at once
+    pattern.forEach((index) => {
+        const cell = document.querySelectorAll('.grid-cell')[index];
+        cell.classList.add('active');
+    });
+
+    // Remove the highlight after a short delay
+    setTimeout(() => {
+        pattern.forEach((index) => {
+            const cell = document.querySelectorAll('.grid-cell')[index];
+            cell.classList.remove('active');
+        });
+        allowInput = true;  // Allow user to start clicking after the pattern is hidden
+    }, 1000);  // Adjust the delay as needed
+}
+
         
         // Handle user cell clicks
         function handleCellClick(index) {
