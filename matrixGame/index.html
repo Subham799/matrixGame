@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Pattern Memory Game</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+
+      #game-container {
+        display: grid;
+        margin: 20px auto;
+        width: fit-content;
+        gap: 5px;
+      }
+
+      .grid-cell {
+        width: 50px;
+        height: 50px;
+        background-color: #8b4513; /* Brown background */
+        border: 1px solid #000;
+      }
+
+      .grid-cell.active {
+        background-color: #00ffff; /* Highlighted (cyan) */
+      }
+
+      button {
+        padding: 10px 20px;
+        margin-top: 20px;
+        font-size: 16px;
+      }
+
+      #score,
+      #lives,
+      #timer {
+        margin: 10px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Advanced Pattern Memory Game</h1>
+    <div id="score">Score: 0</div>
+    <div id="lives">Lives: 3</div>
+    <div id="timer">Time Left: 10s</div>
+    <div id="game-container"></div>
+    <button id="start-game">Start Game</button>
+    <button id="restart-game" style="display: none">Restart Game</button>
+
+    <script>
+      let gridSize = 3;
+      let pattern = [];
+      let userPattern = [];
+      let allowInput = false;
+      let score = 0;
+      let lives = 3;
+      let timer;
+      let timeLeft = 10;
+
+      const gameContainer = document.getElementById("game-container");
+      const startButton = document.getElementById("start-game");
+      const restartButton = document.getElementById("restart-game");
+      const scoreDisplay = document.getElementById("score");
+      const livesDisplay = document.getElementById("lives");
+      const timerDisplay = document.getElementById("timer");
+
+      function createGrid(size) {
+        gameContainer.innerHTML = "";
+        gameContainer.style.gridTemplateColumns = `repeat(${size}, 50px)`;
+
+        for (let i = 0; i < size * size; i++) {
+          const cell = document.createElement("div");
+          cell.classList.add("grid-cell");
+          cell.addEventListener("click", () => handleCellClick(i));
+          gameContainer.appendChild(cell);
+        }
+      }
+
+      function generatePattern(size) {
+        pattern = [];
+        const numCells = size * size;
+        const patternLength = Math.floor(size * 1.5);
+
+        while (pattern.length < patternLength) {
+          const randomIndex = Math.floor(Math.random() * numCells);
+          if (!pattern.includes(randomIndex)) {
+            pattern.push(randomIndex);
+          }
+        }
+      }
+
+      function showPattern() {
+        allowInput = false;
+        userPattern = [];
+        pattern.forEach((index) => {
+          const cell = document.querySelectorAll(".grid-cell")[index];
+          cell.classList.add("active");
+        });
+
+        setTimeout(() => {
+          pattern.forEach((index) => {
+            const cell = document.querySelectorAll(".grid-cell")[index];
+            cell.classList.remove("active");
+          });
+          allowInput = true;
+          startTimer();
+        }, 1000);
+      }
+
+      function handleCellClick(index) {
+        if (!allowInput) return;
+
+        if (userPattern.includes(index)) return;
+
+        userPattern.push(index);
+        const cell = document.querySelectorAll(".grid-cell")[index];
+        cell.classList.add("active");
+
+        if (userPattern.length === pattern.length) {
+          checkPattern();
+        }
+      }
+
+      function checkPattern() {
+        stopTimer();
+        if (JSON.stringify(userPattern) === JSON.stringify(pattern)) {
+          alert("Correct! Moving to next level.");
+          score += 10;
+          gridSize++;
+          updateScore();
+          startGame();
+        } else {
+          alert("Incorrect! You lost a life.");
+          lives--;
+          updateLives();
+          if (lives > 0) {
+            resetGrid();
+          } else {
+            alert("Game Over! Your score: " + score);
+            endGame();
+          }
+        }
+      }
+
+      function resetGrid() {
+        userPattern = [];
+        document.querySelectorAll(".grid-cell").forEach((cell) => {
+          cell.classList.remove("active");
+        });
+      }
+
+      function startTimer() {
+        timeLeft = 10;
+        timerDisplay.textContent = `Time Left: ${timeLeft}s`;
+        timer = setInterval(() => {
+          timeLeft--;
+          timerDisplay.textContent = `Time Left: ${timeLeft}s`;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert("Time's up! You lost a life.");
+            lives--;
+            updateLives();
+            if (lives > 0) {
+              resetGrid();
+            } else {
+              alert("Game Over! Your score: " + score);
+              endGame();
+            }
+          }
+        }, 1000);
+      }
+
+      function stopTimer() {
+        clearInterval(timer);
+      }
+
+      function updateScore() {
+        scoreDisplay.textContent = `Score: ${score}`;
+      }
+
+      function updateLives() {
+        livesDisplay.textContent = `Lives: ${lives}`;
+      }
+
+      function startGame() {
+        createGrid(gridSize);
+        generatePattern(gridSize);
+        setTimeout(showPattern, 1000);
+      }
+
+      function endGame() {
+        allowInput = false;
+        startButton.style.display = "none";
+        restartButton.style.display = "inline-block";
+      }
+
+      function restartGame() {
+        gridSize = 3;
+        score = 0;
+        lives = 3;
+        updateScore();
+        updateLives();
+        startButton.style.display = "inline-block";
+        restartButton.style.display = "none";
+        startGame();
+      }
+
+      startButton.addEventListener("click", startGame);
+      restartButton.addEventListener("click", restartGame);
+    </script>
+  </body>
+</html>
